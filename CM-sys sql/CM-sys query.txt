@@ -1,0 +1,988 @@
+create database company;
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'raguram';
+flush privileges;
+
+use company;
+
+select * from state;
+select * from district;
+select * from industry;
+
+CREATE TABLE IF NOT EXISTS state(
+  state_id int NOT NULL auto_increment,
+  name varchar(50) not null,
+  PRIMARY KEY (state_id)
+);
+
+CREATE TABLE IF NOT EXISTS district(
+  district_id int NOT NULL auto_increment,
+  district varchar(50) not null ,
+  state int not null, 
+  PRIMARY KEY (district_id),
+  foreign key(state) references state(state_id)
+);
+
+CREATE TABLE IF NOT EXISTS industry(
+  id int NOT NULL auto_increment,
+  industry varchar(50) not null,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS roles( 
+  id int NOT NULL auto_increment,
+  name varchar(50) NOT NULL,
+  PRIMARY KEY (id)
+);
+select * from roles;
+
+CREATE TABLE IF NOT EXISTS membership( 
+  id int NOT NULL AUTO_INCREMENT,
+  type varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+select * from membership;
+
+CREATE TABLE IF NOT EXISTS user_otp( 
+  id bigint NOT NULL auto_increment,
+  mobile_number varchar(50) NOT NULL UNIQUE KEY,
+  user_otp varchar(50) NOT NULL,
+  created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+select * from user_otp;
+
+CREATE TABLE IF NOT EXISTS business_user( 
+  business_user_id bigint NOT NULL auto_increment,
+  company_name varchar(50) NOT NULL,
+  owner varchar(50) NOT NULL,
+  email varchar(50) NOT NULL UNIQUE KEY,
+  mobile_number varchar(50) NOT NULL UNIQUE KEY,
+  industry varchar(50),
+  website varchar(50),
+  company_description varchar(100),
+  tag varchar(50),
+  PRIMARY KEY (business_user_id)
+);
+select * from business_user;
+
+CREATE TABLE IF NOT EXISTS business_user_address( 
+  id bigint NOT NULL auto_increment,
+  address varchar(50),
+  city varchar(50),
+  district varchar(50),
+  state varchar(50),
+  zipcode varchar(50),
+  business_user_id bigint not null,
+  PRIMARY KEY (id),
+  foreign key(business_user_id) references business_user(business_user_id)
+);
+select * from business_user_address;
+
+CREATE TABLE IF NOT EXISTS user_account( 
+  id bigint NOT NULL auto_increment,
+  user_name varchar(20) NOT NULL UNIQUE KEY,
+  email varchar(50) NOT NULL UNIQUE KEY,
+  password varchar(120) NOT NULL, 
+  active int not null,
+  business_user_id bigint,
+  user_id bigint,
+  password_expire_date DATE not null,
+  password_expired int not null,
+  created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  foreign key(business_user_id) references business_user(business_user_id),
+  foreign key(user_id) references users(user_id)
+);
+select * from user_account;
+
+SET FOREIGN_KEY_CHECKS=0;
+SET GLOBAL FOREIGN_KEY_CHECKS=0;
+
+CREATE TABLE IF NOT EXISTS user_roles( 
+  business_user_id bigint,
+  user_id bigint,
+  role_id int NOT NULL,
+  foreign key(business_user_id) references business_user(business_user_id),
+  foreign key(user_id) references users(user_id),
+  foreign key(role_id) references roles(id)
+);
+select * from user_roles;
+
+CREATE TABLE IF NOT EXISTS user_membership( 
+  id bigint NOT NULL auto_increment,
+  membership_type int NOT NULL,
+  active int NOT NULL,
+  business_user_id bigint NOT NULL,
+  created_date timestamp  DEFAULT CURRENT_TIMESTAMP,
+  expired_date timestamp  DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (business_user_id ) REFERENCES business_user  (business_user_id ),
+  FOREIGN KEY (membership_type) REFERENCES membership (id)
+);
+select * from user_membership;
+
+CREATE TABLE IF NOT EXISTS users( 
+  user_id bigint NOT NULL auto_increment,
+  first_name varchar(50) NOT NULL,
+  last_name varchar(50),
+  email varchar(50) NOT NULL UNIQUE KEY,
+  mobile_number varchar(50) NOT NULL UNIQUE KEY,
+  tag varchar(50),
+  created_by int,
+  PRIMARY KEY (user_id)
+);
+select * from users;
+
+CREATE TABLE IF NOT EXISTS user_address( 
+  id bigint NOT NULL auto_increment,
+  address varchar(50),
+  city varchar(50),
+  district varchar(50),
+  state varchar(50),
+  zipcode varchar(50),
+  user_id bigint not null,
+  PRIMARY KEY (id),
+  foreign key(user_id) references users(user_id)
+);
+select * from user_address;
+
+CREATE TABLE IF NOT EXISTS customer( 
+  customer_id bigint NOT NULL auto_increment,
+  customer_number varchar(50) NOT NULL,
+  customer_name varchar(50) NOT NULL,
+  email varchar(50) NOT NULL UNIQUE KEY,
+  mobile_number varchar(50) NOT NULL UNIQUE KEY,
+  whatsapp_number varchar(50),
+  PRIMARY KEY (customer_id)
+);
+select * from customer;
+
+CREATE TABLE IF NOT EXISTS customer_address( 
+  id bigint NOT NULL auto_increment,
+  address varchar(50),
+  city varchar(50),
+  district varchar(50),
+  state varchar(50),
+  zipcode varchar(50),
+  customer_id bigint not null,
+  PRIMARY KEY (id),
+  foreign key(customer_id) references customer(customer_id)
+);
+select * from customer_address;                							
+
+
+insert into user_roles values(1, 1000);
+
+insert into roles values(1,"ROLE_FINANCEUSER");
+insert into roles values(2,"ROLE_AGENTUSER");
+insert into roles values(3,"ROLE_CUSTOMER");
+insert into roles values(4,'ROLE_ADMIN');
+insert into roles values(5,'ROLE_DWM_ALL');
+insert into roles values(6,'ROLE_DWM_READ');
+
+insert into membership values(1,"FREE_MEMBERSHIP");
+insert into membership values(2,"SILVER_MEMBERSHIP");
+insert into membership values(3,"GOLD_MEMBERSHIP");
+insert into membership values(4,"PLATINUM_MEMBERSHIP");
+
+INSERT INTO industry (`id`,`industry`) VALUES (1,'Tertiary');
+INSERT INTO industry (`id`,`industry`) VALUES (2,'Primary industries');
+INSERT INTO industry (`id`,`industry`) VALUES (3,'Secondary industries');
+INSERT INTO industry (`id`,`industry`) VALUES (4,'Construction');
+INSERT INTO industry (`id`,`industry`) VALUES (5,'Manufacturing');
+INSERT INTO industry (`id`,`industry`) VALUES (6,'Agriculture');
+INSERT INTO industry (`id`,`industry`) VALUES (7,'Education');
+INSERT INTO industry (`id`,`industry`) VALUES (8,'Healthcare');
+
+INSERT INTO state (`state_id`,`name`) VALUES (1,'Andhra Pradesh');
+INSERT INTO state (`state_id`,`name`) VALUES (2,'Arunachal Pradesh');
+INSERT INTO state (`state_id`,`name`) VALUES (3,'Assam');
+INSERT INTO state (`state_id`,`name`) VALUES (4,'Bihar');
+INSERT INTO state (`state_id`,`name`) VALUES (5,'Chandigarh (UT)');
+INSERT INTO state (`state_id`,`name`) VALUES (6,'Chhattisgarh');
+INSERT INTO state (`state_id`,`name`) VALUES (7,'Dadra and Nagar Haveli (UT)');
+INSERT INTO state (`state_id`,`name`) VALUES (8,'Daman and Diu (UT)');
+INSERT INTO state (`state_id`,`name`) VALUES (9,'Delhi (NCT)');
+INSERT INTO state (`state_id`,`name`) VALUES (10,'Goa');
+INSERT INTO state (`state_id`,`name`) VALUES (11,'Gujarat');
+INSERT INTO state (`state_id`,`name`) VALUES (12,'Haryana');
+INSERT INTO state (`state_id`,`name`) VALUES (13,'Himachal Pradesh');
+INSERT INTO state (`state_id`,`name`) VALUES (14,'Jammu and Kashmir');
+INSERT INTO state (`state_id`,`name`) VALUES (15,'Jharkhand');
+INSERT INTO state (`state_id`,`name`) VALUES (16,'Karnataka');
+INSERT INTO state (`state_id`,`name`) VALUES (17,'Kerala');
+INSERT INTO state (`state_id`,`name`) VALUES (18,'Lakshadweep (UT)');
+INSERT INTO state (`state_id`,`name`) VALUES (19,'Madhya Pradesh');
+INSERT INTO state (`state_id`,`name`) VALUES (20,'Maharashtra');
+INSERT INTO state (`state_id`,`name`) VALUES (21,'Manipur');
+INSERT INTO state (`state_id`,`name`) VALUES (22,'Meghalaya');
+INSERT INTO state (`state_id`,`name`) VALUES (23,'Mizoram');
+INSERT INTO state (`state_id`,`name`) VALUES (24,'Nagaland');
+INSERT INTO state (`state_id`,`name`) VALUES (25,'Odisha');
+INSERT INTO state (`state_id`,`name`) VALUES (26,'Puducherry (UT)');
+INSERT INTO state (`state_id`,`name`) VALUES (27,'Punjab');
+INSERT INTO state (`state_id`,`name`) VALUES (28,'Rajasthan');
+INSERT INTO state (`state_id`,`name`) VALUES (29,'Sikkim');
+INSERT INTO state (`state_id`,`name`) VALUES (30,'Tamil Nadu');
+INSERT INTO state (`state_id`,`name`) VALUES (31,'Telangana');
+INSERT INTO state (`state_id`,`name`) VALUES (32,'Tripura');
+INSERT INTO state (`state_id`,`name`) VALUES (33,'Uttarakhand');
+INSERT INTO state (`state_id`,`name`) VALUES (34,'Uttar Pradesh');
+INSERT INTO state (`state_id`,`name`) VALUES (35,'West Bengal');
+INSERT INTO state (`state_id`,`name`) VALUES (36,'Andaman and Nicobar');
+INSERT INTO state (`state_id`,`name`) VALUES (37,'Ladakh');
+
+
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (1,'Anantapuramu',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (2,'Chittoor',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (3,'East Godavari',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (4,'Guntur',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (5,'Krishna',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (6,'Kurnool',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (7,'NTR',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (8,'Prakasam',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (9,'Srikakulam',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (10,'Visakhapatnam',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (11,'Vizianagaram',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (12,'West Godavari',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (13,'YSR Kadapa',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (14,'Tawang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (15,'West Kameng',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (16,'East Kameng',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (17,'Papum Pare',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (18,'Kurung Kumey',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (19,'Kra Daadi',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (20,'Lower Subansiri',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (21,'Upper Subansiri',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (22,'West Siang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (23,'East Siang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (24,'Siang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (25,'Upper Siang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (26,'Lower Siang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (27,'Lower Dibang Valley',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (28,'Dibang Valley',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (29,'Anjaw',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (30,'Lohit',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (31,'Namsai',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (32,'Changlang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (33,'Tirap',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (34,'Longding',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (35,'Baksa',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (36,'Barpeta',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (37,'Biswanath',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (38,'Bongaigaon',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (39,'Cachar',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (40,'Charaideo',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (41,'Chirang',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (42,'Darrang',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (43,'Dhemaji',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (44,'Dhubri',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (45,'Dibrugarh',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (46,'Goalpara',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (47,'Golaghat',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (48,'Hailakandi',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (49,'Hojai',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (50,'Jorhat',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (51,'Kamrup Metropolitan',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (52,'Kamrup',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (53,'Karbi Anglong',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (54,'Karimganj',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (55,'Kokrajhar',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (56,'Lakhimpur',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (57,'Majuli',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (58,'Morigaon',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (59,'Nagaon',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (60,'Nalbari',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (61,'Dima Hasao',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (62,'Sivasagar',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (63,'Sonitpur',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (64,'South Salmara-Mankachar',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (65,'Tinsukia',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (66,'Udalguri',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (67,'West Karbi Anglong',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (68,'Araria',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (69,'Arwal',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (70,'Aurangabad',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (71,'Banka',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (72,'Begusarai',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (73,'Bhagalpur',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (74,'Bhojpur',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (75,'Buxar',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (76,'Darbhanga',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (77,'East Champaran (Motihari)',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (78,'Gaya',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (79,'Gopalganj',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (80,'Jamui',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (81,'Jehanabad',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (82,'Kaimur (Bhabua)',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (83,'Katihar',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (84,'Khagaria',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (85,'Kishanganj',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (86,'Lakhisarai',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (87,'Madhepura',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (88,'Madhubani',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (89,'Munger (Monghyr)',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (90,'Muzaffarpur',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (91,'Nalanda',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (92,'Nawada',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (93,'Patna',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (94,'Purnia (Purnea)',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (95,'Rohtas',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (96,'Saharsa',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (97,'Samastipur',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (98,'Saran',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (99,'Sheikhpura',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (100,'Sheohar',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (101,'Sitamarhi',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (102,'Siwan',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (103,'Supaul',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (104,'Vaishali',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (105,'West Champaran',4);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (106,'Chandigarh',5);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (107,'Balod',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (108,'Baloda Bazar',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (109,'Balrampur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (110,'Bastar',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (111,'Bemetara',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (112,'Bijapur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (113,'Bilaspur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (114,'Dantewada (South Bastar)',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (115,'Dhamtari',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (116,'Durg',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (117,'Gariyaband',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (118,'Janjgir-Champa',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (119,'Jashpur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (120,'Kabirdham (Kawardha)',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (121,'Kanker (North Bastar)',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (122,'Kondagaon',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (123,'Korba',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (124,'Korea (Koriya)',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (125,'Mahasamund',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (126,'Mungeli',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (127,'Narayanpur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (128,'Raigarh',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (129,'Raipur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (130,'Rajnandgaon',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (131,'Sukma',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (132,'Surajpur  ',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (133,'Surguja',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (134,'Dadra & Nagar Haveli',7);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (135,'Daman',8);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (136,'Diu',8);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (137,'Central Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (138,'East Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (139,'New Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (140,'North Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (141,'North East  Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (142,'North West  Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (143,'Shahdara',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (144,'South Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (145,'South East Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (146,'South West  Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (147,'West Delhi',9);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (148,'North Goa',10);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (149,'South Goa',10);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (150,'Ahmedabad',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (151,'Amreli',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (152,'Anand',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (153,'Aravalli',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (154,'Banaskantha (Palanpur)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (155,'Bharuch',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (156,'Bhavnagar',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (157,'Botad',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (158,'Chhota Udepur',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (159,'Dahod',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (160,'Dangs (Ahwa)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (161,'Devbhoomi Dwarka',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (162,'Gandhinagar',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (163,'Gir Somnath',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (164,'Jamnagar',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (165,'Junagadh',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (166,'Kutch',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (167,'Kheda (Nadiad)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (168,'Mahisagar',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (169,'Mehsana',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (170,'Morbi',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (171,'Narmada (Rajpipla)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (172,'Navsari',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (173,'Panchmahal (Godhra)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (174,'Patan',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (175,'Porbandar',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (176,'Rajkot',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (177,'Sabarkantha (Himmatnagar)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (178,'Surat',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (179,'Surendranagar',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (180,'Tapi (Vyara)',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (181,'Vadodara',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (182,'Valsad',11);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (183,'Ambala',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (184,'Bhiwani',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (185,'Charkhi Dadri',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (186,'Faridabad',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (187,'Fatehabad',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (188,'Gurgaon',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (189,'Hisar',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (190,'Jhajjar',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (191,'Jind',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (192,'Kaithal',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (193,'Karnal',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (194,'Kurukshetra',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (195,'Mahendragarh',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (196,'Nuh',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (197,'Palwal',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (198,'Panchkula',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (199,'Panipat',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (200,'Rewari',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (201,'Rohtak',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (202,'Sirsa',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (203,'Sonipat',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (204,'Yamunanagar',12);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (205,'Bilaspur',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (206,'Chamba',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (207,'Hamirpur',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (208,'Kangra',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (209,'Kinnaur',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (210,'Kullu',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (211,'Lahaul & Spiti',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (212,'Mandi',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (213,'Shimla',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (214,'Sirmaur (Sirmour)',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (215,'Solan',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (216,'Una',13);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (217,'Anantnag',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (218,'Bandipore',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (219,'Baramulla',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (220,'Budgam',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (221,'Doda',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (222,'Ganderbal',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (223,'Jammu',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (224,'Kargil',37);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (225,'Kathua',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (226,'Kishtwar',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (227,'Kulgam',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (228,'Kupwara',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (229,'Leh',37);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (230,'Poonch',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (231,'Pulwama',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (232,'Rajouri',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (233,'Ramban',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (234,'Reasi',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (235,'Samba',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (236,'Shopian',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (237,'Srinagar',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (238,'Udhampur',14);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (239,'Bokaro',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (240,'Chatra',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (241,'Deoghar',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (242,'Dhanbad',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (243,'Dumka',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (244,'East Singhbhum',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (245,'Garhwa',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (246,'Giridih',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (247,'Godda',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (248,'Gumla',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (249,'Hazaribag',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (250,'Jamtara',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (251,'Khunti',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (252,'Koderma',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (253,'Latehar',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (254,'Lohardaga',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (255,'Pakur',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (256,'Palamu',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (257,'Ramgarh',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (258,'Ranchi',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (259,'Sahibganj',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (260,'Seraikela-Kharsawan',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (261,'Simdega',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (262,'West Singhbhum',15);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (263,'Bagalkot',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (264,'Ballari (Bellary)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (265,'Belagavi (Belgaum)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (266,'Bengaluru (Bangalore) Rural',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (267,'Bengaluru (Bangalore) Urban',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (268,'Bidar',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (269,'Chamarajanagar',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (270,'Chikballapur',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (271,'Chikkamagaluru (Chikmagalur)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (272,'Chitradurga',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (273,'Dakshina Kannada',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (274,'Davangere',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (275,'Dharwad',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (276,'Gadag',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (277,'Hassan',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (278,'Haveri',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (279,'Kalaburagi (Gulbarga)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (280,'Kodagu',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (281,'Kolar',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (282,'Koppal',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (283,'Mandya',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (284,'Mysuru (Mysore)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (285,'Raichur',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (286,'Ramanagara',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (287,'Shivamogga (Shimoga)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (288,'Tumakuru (Tumkur)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (289,'Udupi',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (290,'Uttara Kannada (Karwar)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (291,'Vijayapura (Bijapur)',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (292,'Yadgir',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (293,'Alappuzha',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (294,'Ernakulam',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (295,'Idukki',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (296,'Kannur',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (297,'Kasaragod',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (298,'Kollam',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (299,'Kottayam',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (300,'Kozhikode',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (301,'Malappuram',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (302,'Palakkad',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (303,'Pathanamthitta',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (304,'Thiruvananthapuram',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (305,'Thrissur',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (306,'Wayanad',17);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (307,'Lakshadweep',18);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (317,'Agar Malwa',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (318,'Alirajpur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (319,'Anuppur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (320,'Ashoknagar',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (321,'Balaghat',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (322,'Barwani',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (323,'Betul',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (324,'Bhind',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (325,'Bhopal',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (326,'Burhanpur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (327,'Chhatarpur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (328,'Chhindwara',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (329,'Damoh',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (330,'Datia',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (331,'Dewas',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (332,'Dhar',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (333,'Dindori',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (334,'Guna',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (335,'Gwalior',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (336,'Harda',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (337,'Narmadapuram',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (338,'Indore',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (339,'Jabalpur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (340,'Jhabua',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (341,'Katni',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (342,'Khandwa',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (343,'Khargone',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (344,'Mandla',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (345,'Mandsaur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (346,'Morena',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (347,'Narsinghpur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (348,'Neemuch',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (349,'Panna',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (350,'Raisen',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (351,'Rajgarh',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (352,'Ratlam',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (353,'Rewa',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (354,'Sagar',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (355,'Satna',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (356,'Sehore',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (357,'Seoni',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (358,'Shahdol',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (359,'Shajapur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (360,'Sheopur',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (361,'Shivpuri',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (362,'Sidhi',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (363,'Singrauli',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (364,'Tikamgarh',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (365,'Ujjain',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (366,'Umaria',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (367,'Vidisha',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (368,'Ahmednagar',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (369,'Akola',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (370,'Amravati',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (371,'Aurangabad',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (372,'Beed',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (373,'Bhandara',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (374,'Buldhana',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (375,'Chandrapur',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (376,'Dhule',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (377,'Gadchiroli',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (378,'Gondia',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (379,'Hingoli',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (380,'Jalgaon',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (381,'Jalna',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (382,'Kolhapur',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (383,'Latur',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (384,'Mumbai City',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (385,'Mumbai Suburban',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (386,'Nagpur',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (387,'Nanded',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (388,'Nandurbar',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (389,'Nashik',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (390,'Osmanabad',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (391,'Palghar',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (392,'Parbhani',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (393,'Pune',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (394,'Raigad',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (395,'Ratnagiri',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (396,'Sangli',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (397,'Satara',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (398,'Sindhudurg',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (399,'Solapur',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (400,'Thane',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (401,'Wardha',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (402,'Washim',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (403,'Yavatmal',20);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (404,'Bishnupur',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (405,'Chandel',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (406,'Churachandpur',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (407,'Imphal East',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (408,'Imphal West',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (409,'Jiribam',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (410,'Kakching',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (411,'Kamjong',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (412,'Kangpokpi',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (413,'Noney',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (414,'Pherzawl',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (415,'Senapati',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (416,'Tamenglong',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (417,'Tengnoupal',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (418,'Thoubal',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (419,'Ukhrul',21);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (420,'East Garo Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (421,'East Jaintia Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (422,'East Khasi Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (423,'North Garo Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (424,'Ri Bhoi',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (425,'South Garo Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (426,'South West Garo Hills ',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (427,'South West Khasi Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (428,'West Garo Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (429,'West Jaintia Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (430,'West Khasi Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (431,'Aizawl',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (432,'Champhai',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (433,'Kolasib',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (434,'Lawngtlai',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (435,'Lunglei',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (436,'Mamit',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (437,'Saiha',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (438,'Serchhip',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (439,'Dimapur',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (440,'Kiphire',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (441,'Kohima',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (442,'Longleng',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (443,'Mokokchung',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (444,'Mon',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (445,'Peren',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (446,'Phek',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (447,'Tuensang',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (448,'Wokha',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (449,'Zunheboto',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (450,'Angul',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (451,'Balangir',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (452,'Balasore',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (453,'Bargarh',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (454,'Bhadrak',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (455,'Boudh',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (456,'Cuttack',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (457,'Debagarh',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (458,'Dhenkanal',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (459,'Gajapati',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (460,'Ganjam',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (461,'Jagatsinghapur',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (462,'Jajpur',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (463,'Jharsuguda',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (464,'Kalahandi',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (465,'Kandhamal',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (466,'Kendrapara',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (467,'Kendujhar (Keonjhar)',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (468,'Khordha',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (469,'Koraput',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (470,'Malkangiri',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (471,'Mayurbhanj',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (472,'Nabarangpur',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (473,'Nayagarh',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (474,'Nuapada',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (475,'Puri',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (476,'Rayagada',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (477,'Sambalpur',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (478,'Subarnapur',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (479,'Sundargarh',25);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (480,'Karaikal',26);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (481,'Mahe',26);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (482,'Pondicherry',26);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (483,'Yanam',26);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (484,'Amritsar',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (485,'Barnala',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (486,'Bathinda',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (487,'Faridkot',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (488,'Fatehgarh Sahib',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (489,'Fazilka',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (490,'Ferozepur',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (491,'Gurdaspur',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (492,'Hoshiarpur',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (493,'Jalandhar',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (494,'Kapurthala',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (495,'Ludhiana',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (496,'Mansa',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (497,'Moga',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (498,'Sri Muktsar Sahib',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (499,'Nawanshahr (Shahid Bhagat Singh Nagar)',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (500,'Pathankot',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (501,'Patiala',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (502,'Rupnagar',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (503,'Sahibzada Ajit Singh Nagar (Mohali)',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (504,'Sangrur',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (505,'Tarn Taran',27);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (506,'Ajmer',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (507,'Alwar',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (508,'Banswara',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (509,'Baran',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (510,'Barmer',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (511,'Bharatpur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (512,'Bhilwara',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (513,'Bikaner',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (514,'Bundi',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (515,'Chittorgarh',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (516,'Churu',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (517,'Dausa',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (518,'Dholpur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (519,'Dungarpur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (520,'Hanumangarh',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (521,'Jaipur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (522,'Jaisalmer',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (523,'Jalore',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (524,'Jhalawar',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (525,'Jhunjhunu',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (526,'Jodhpur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (527,'Karauli',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (528,'Kota',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (529,'Nagaur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (530,'Pali',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (531,'Pratapgarh',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (532,'Rajsamand',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (533,'Sawai Madhopur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (534,'Sikar',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (535,'Sirohi',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (536,'Sri Ganganagar',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (537,'Tonk',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (538,'Udaipur',28);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (539,'East Sikkim',29);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (540,'North Sikkim',29);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (541,'South Sikkim',29);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (542,'West Sikkim',29);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (543,'Ariyalur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (544,'Chennai',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (545,'Coimbatore',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (546,'Cuddalore',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (547,'Dharmapuri',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (548,'Dindigul',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (549,'Erode',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (550,'Kanchipuram',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (551,'Kanyakumari',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (552,'Karur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (553,'Krishnagiri',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (554,'Madurai',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (555,'Nagapattinam',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (556,'Namakkal',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (557,'Nilgiris',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (558,'Perambalur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (559,'Pudukkottai',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (560,'Ramanathapuram',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (561,'Salem',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (562,'Sivaganga',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (563,'Thanjavur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (564,'Theni',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (565,'Thoothukudi (Tuticorin)',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (566,'Tiruchirappalli',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (567,'Tirunelveli',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (568,'Tiruppur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (569,'Tiruvallur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (570,'Tiruvannamalai',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (571,'Tiruvarur',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (572,'Vellore',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (573,'Viluppuram',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (574,'Virudhunagar',30);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (575,'Adilabad',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (576,'Bhadradri Kothagudem',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (577,'Hyderabad',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (578,'Jagtial',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (579,'Jangaon',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (580,'Jayashankar Bhoopalpally',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (581,'Jogulamba Gadwal',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (582,'Kamareddy',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (583,'Karimnagar',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (584,'Khammam',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (585,'Komaram Bheem Asifabad',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (586,'Mahabubabad',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (587,'Mahabubnagar',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (588,'Mancherial',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (589,'Medak',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (590,'Medchal',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (591,'Nagarkurnool',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (592,'Nalgonda',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (593,'Nirmal',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (594,'Nizamabad',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (595,'Peddapalli',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (596,'Rajanna Sircilla',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (597,'Rangareddy',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (598,'Sangareddy',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (599,'Siddipet',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (600,'Suryapet',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (601,'Vikarabad',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (602,'Wanaparthy',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (603,'Warangal (Rural)',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (604,'Warangal (Urban)',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (605,'Yadadri Bhuvanagiri',31);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (606,'Dhalai',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (607,'Gomati',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (608,'Khowai',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (609,'North Tripura',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (610,'Sepahijala',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (611,'South Tripura',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (612,'Unakoti',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (613,'West Tripura',32);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (614,'Almora',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (615,'Bageshwar',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (616,'Chamoli',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (617,'Champawat',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (618,'Dehradun',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (619,'Haridwar',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (620,'Nainital',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (621,'Pauri Garhwal',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (622,'Pithoragarh',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (623,'Rudraprayag',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (624,'Tehri Garhwal',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (625,'Udham Singh Nagar',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (626,'Uttarkashi',33);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (627,'Agra',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (628,'Aligarh',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (629,'Allahabad',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (630,'Ambedkar Nagar',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (631,'Amethi (Chatrapati Sahuji Mahraj Nagar)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (632,'Amroha (J.P. Nagar)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (633,'Auraiya',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (634,'Azamgarh',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (635,'Baghpat',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (636,'Bahraich',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (637,'Ballia',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (638,'Balrampur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (639,'Banda',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (640,'Barabanki',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (641,'Bareilly',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (642,'Basti',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (643,'Bhadohi',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (644,'Bijnor',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (645,'Budaun',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (646,'Bulandshahr',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (647,'Chandauli',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (648,'Chitrakoot',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (649,'Deoria',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (650,'Etah',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (651,'Etawah',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (652,'Faizabad',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (653,'Farrukhabad',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (654,'Fatehpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (655,'Firozabad',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (656,'Gautam Buddha Nagar',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (657,'Ghaziabad',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (658,'Ghazipur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (659,'Gonda',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (660,'Gorakhpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (661,'Hamirpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (662,'Hapur (Panchsheel Nagar)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (663,'Hardoi',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (664,'Hathras',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (665,'Jalaun',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (666,'Jaunpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (667,'Jhansi',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (668,'Kannauj',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (669,'Kanpur Dehat',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (670,'Kanpur Nagar',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (671,'Kanshiram Nagar (Kasganj)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (672,'Kaushambi',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (673,'Kushinagar (Padrauna)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (674,'Lakhimpur - Kheri',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (675,'Lalitpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (676,'Lucknow',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (677,'Maharajganj',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (678,'Mahoba',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (679,'Mainpuri',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (680,'Mathura',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (681,'Mau',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (682,'Meerut',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (683,'Mirzapur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (684,'Moradabad',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (685,'Muzaffarnagar',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (686,'Pilibhit',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (687,'Pratapgarh',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (688,'RaeBareli',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (689,'Rampur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (690,'Saharanpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (691,'Sambhal (Bhim Nagar)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (692,'Sant Kabir Nagar',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (693,'Shahjahanpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (694,'Shamali (Prabuddh Nagar)',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (695,'Shravasti',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (696,'Siddharth Nagar',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (697,'Sitapur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (698,'Sonbhadra',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (699,'Sultanpur',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (700,'Unnao',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (701,'Varanasi',34);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (702,'Alipurduar',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (703,'Bankura',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (704,'Birbhum',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (705,'Burdwan (Bardhaman)',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (706,'Cooch Behar',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (707,'Dakshin Dinajpur (South Dinajpur)',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (708,'Darjeeling',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (709,'Hooghly',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (710,'Howrah',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (711,'Jalpaiguri',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (712,'Kalimpong',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (713,'Kolkata',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (714,'Malda',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (715,'Murshidabad',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (716,'Nadia',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (717,'North 24 Parganas',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (718,'Paschim Medinipur (West Medinipur)',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (719,'Purba Medinipur (East Medinipur)',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (720,'Purulia',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (721,'South 24 Parganas',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (722,'Uttar Dinajpur (North Dinajpur)',35);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (723,'Alluri Sitharama Raju',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (724,'Anakapalli',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (725,'Annamayya',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (726,'Bapatla',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (727,'Eluru',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (728,'Kakinada',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (729,'Konaseema',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (730,'Nandyal',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (731,'Palnadu',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (732,'Parvathipuram Manyam',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (733,'Sri Potti Sriramulu Nellore',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (734,'Sri Sathya Sai',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (735,'Tirupati',1);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (736,'Kamle',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (737,'Lepa-Rada',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (738,'Pakke-Kessang',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (739,'Shi-Yomi',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (740,'Itanagar',2);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (741,'Bajali',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (742,'Tamulpur',3);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (743,'Gaurella-Pendra-Marwahi',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (744,'Khairagarh-Chhuikhadan-Gandai',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (745,'Manendragarh-Chirmiri-Bharatpur',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (746,'Mohla-Manpur-Chowki',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (747,'Sarangarh-Bilaigarh',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (748,'Sakti',6);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (749,'Vijayanagara',16);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (750,'Niwari',19);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (751,'Eastern West Khasi Hills',22);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (752,'Khawzawl',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (753,'Hnahthial',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (754,'Saitual',23);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (755,'Chümoukedima',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (756,'Niuland',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (757,'Noklak',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (758,'Shamator',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (759,'Tseminyü',24);
+INSERT INTO district (`district_id`,`district`,`state`) VALUES (760,'Malerkotla',27);
